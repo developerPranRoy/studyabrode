@@ -1,0 +1,43 @@
+services:
+  - type: web
+    name: studyabrode-api
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm run build && npx prisma generate && npx prisma migrate deploy && npx tsx scripts/apply-sql.ts
+    startCommand: npm run start
+    healthCheckPath: /api/v1/lookups/programs
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: JWT_EXPIRES_IN
+        value: 1d
+      - key: CORS_ORIGINS
+        value: https://studyabrod-client.onrender.com
+      - key: APP_URL
+        value: https://studyabrod-client.onrender.com
+      - key: UPLOAD_DIR
+        value: uploads
+      - key: UNIVERSITY_API_URL
+        value: http://universities.hipolabs.com/search
+      - key: SMTP_HOST
+        value: smtp.gmail.com
+      - key: SMTP_PORT
+        value: 587
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: MAIL_FROM
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: TURNSTILE_SECRET_KEY
+        value: ""

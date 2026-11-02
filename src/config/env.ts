@@ -25,6 +25,7 @@ const schema = z.object({
   MAIL_FROM: z.string().default('AbroadMates <team@abroadmates.com>'),
   TURNSTILE_SECRET_KEY: optionalString,
   GOOGLE_CLIENT_ID: optionalString,
+  PAYOUT_ENCRYPTION_KEY: optionalString,
 });
 
 // Fail fast: the app must never boot with a missing or weak configuration.
