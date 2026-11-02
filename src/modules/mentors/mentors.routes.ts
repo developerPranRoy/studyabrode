@@ -5,15 +5,19 @@ import { validate } from '../../middlewares/validate.js';
 import { idParams } from '../../utils/commonSchemas.js';
 import * as controller from './mentors.controller.js';
 import { createMentorSchema, exportSchema, listSchema, updateMentorSchema } from './mentors.schema.js';
+import mentorMeRouter from '../mentor-me/mentor-me.routes.js';
 
 const router = Router();
 const mentorOnly = [authenticate, authorize('MENTOR')];
 const photoUpload = uploadFile('photo');
 const cvUpload = uploadFile('cv');
 
-// Static paths first, so "/me" and "/export/*" are never captured by "/:id".
+// Mount the full mentor-me wizard/dashboard router at /me FIRST so its paths
+// are matched before the generic /:id param route below.
+router.use('/me', mentorMeRouter);
+
+// Static paths first, so "/export/*" are never captured by "/:id".
 router.get('/', optionalAuth, validate(listSchema), controller.list);
-router.get('/me', ...mentorOnly, controller.getMine);
 router.get('/export/excel', authenticate, validate(exportSchema), controller.exportExcel);
 router.get('/export/pdf', authenticate, validate(exportSchema), controller.exportPdf);
 

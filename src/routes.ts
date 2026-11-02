@@ -2,7 +2,6 @@ import { Router } from 'express';
 import authRoutes from './modules/auth/auth.routes.js';
 import bookingRoutes from './modules/bookings/bookings.routes.js';
 import lookupRoutes from './modules/lookups/lookups.routes.js';
-import mentorMeRoutes from './modules/mentor-me/mentor-me.routes.js';
 import mentorRoutes from './modules/mentors/mentors.routes.js';
 import notificationRoutes from './modules/notifications/notifications.routes.js';
 import sessionRoutes from './modules/sessions/sessions.routes.js';
@@ -13,8 +12,7 @@ const router = Router();
 router.use('/auth', authRoutes);
 router.use('/lookups', lookupRoutes);
 router.use('/students', studentRoutes);
-router.use('/mentors/me', mentorMeRoutes);  // mentor's own wizard/dashboard (must be before /mentors/:id)
-router.use('/mentors', mentorRoutes);
+router.use('/mentors', mentorRoutes);   // mentor-me is mounted inside as /me sub-router
 router.use('/bookings', bookingRoutes);
 router.use('/sessions', sessionRoutes);
 router.use('/notifications', notificationRoutes);

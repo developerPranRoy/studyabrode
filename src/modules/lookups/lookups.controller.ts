@@ -21,6 +21,10 @@ export const sessionCategories = catchAsync(async (_req, res) =>
 export const onboardingOptions = catchAsync(async (_req, res) =>
   sendSuccess(res, await service.getOnboardingOptions()));
 export const timezones = catchAsync(async (_req, res) => sendSuccess(res, service.getTimezones()));
+export const mentorOnboardingOptions = catchAsync(async (_req, res) =>
+  sendSuccess(res, await service.getMentorOnboardingOptions()));
+export const pricingMarkets = catchAsync(async (_req, res) =>
+  sendSuccess(res, await service.getPricingMarkets()));
 
 export const universities = catchAsync(async (req, res) => {
   const { countryId } = req.query as unknown as { countryId: number };

@@ -99,3 +99,51 @@ export const getUniversitiesByCountry = async (countryId: number) => {
   universityCache.set(country.id, { data, expiresAt: Date.now() + CACHE_TTL_MS });
   return data;
 };
+
+/** Mentor wizard option lists — sources, education statuses, scholarships, help topics, etc. */
+export const getMentorOnboardingOptions = async () => {
+  const [programs, scholarships, sources, services, helpTopics] = await Promise.all([
+    getPrograms(),
+    getScholarships(),
+    getOnboardingOptions().then((opts: any) => opts?.sources ?? []),
+    getServices(),
+    getOnboardingOptions().then((opts: any) => opts?.helpTopics ?? []),
+  ]);
+
+  return {
+    sources,
+    programs,
+    scholarships,
+    services,
+    helpTopics,
+    educationStatuses: [
+      { id: 1, name: 'Currently studying', slug: 'current', isCurrent: true },
+      { id: 2, name: 'Graduated',           slug: 'graduated', isCurrent: false },
+    ],
+    socialPlatforms: [
+      { id: 1, name: 'LinkedIn',   slug: 'linkedin',   domains: ['linkedin.com', 'www.linkedin.com'] },
+      { id: 2, name: 'Facebook',   slug: 'facebook',   domains: ['facebook.com', 'www.facebook.com'] },
+      { id: 3, name: 'Instagram',  slug: 'instagram',  domains: ['instagram.com', 'www.instagram.com'] },
+      { id: 4, name: 'Twitter/X',  slug: 'twitter',    domains: ['twitter.com', 'x.com', 'www.twitter.com'] },
+      { id: 5, name: 'YouTube',    slug: 'youtube',    domains: ['youtube.com', 'www.youtube.com'] },
+      { id: 6, name: 'Website',    slug: 'website',    domains: [] },
+    ],
+    payoutMethods: [
+      { id: 1, name: 'Bank Transfer', slug: 'bank',     requiredFields: ['accountHolderName','bankName','accountNumber','swift','bankCountry'], optionalFields: ['branchName','branchAddress'] },
+      { id: 2, name: 'PayPal',         slug: 'paypal',   requiredFields: ['email'], optionalFields: [] },
+      { id: 3, name: 'Wise',           slug: 'wise',     requiredFields: ['email'], optionalFields: ['accountHolderName'] },
+      { id: 4, name: 'Payoneer',       slug: 'payoneer', requiredFields: ['email'], optionalFields: [] },
+      { id: 5, name: 'bKash',          slug: 'bkash',    requiredFields: ['mobileNumber'], optionalFields: ['accountHolderName'] },
+    ],
+    pricingMarkets: [
+      { id: 1, name: 'Bangladesh Students',       slug: 'bd',   currency: 'BDT', platformFeePercent: 30, recommended: { 20: 900, 40: 1800 } },
+      { id: 2, name: 'International Students',     slug: 'intl', currency: 'USD', platformFeePercent: 30, recommended: { 20: 25, 40: 40 } },
+    ],
+  };
+};
+
+/** Pricing markets (also returned inside getMentorOnboardingOptions). */
+export const getPricingMarkets = () => [
+  { id: 1, name: 'Bangladesh Students',   slug: 'bd',   currency: 'BDT', platformFeePercent: 30 },
+  { id: 2, name: 'International Students', slug: 'intl', currency: 'USD', platformFeePercent: 30 },
+];

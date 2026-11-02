@@ -6,46 +6,48 @@ import { validate } from '../../middlewares/validate.js';
 import * as c from './mentor-me.controller.js';
 import * as s from './mentor-me.schema.js';
 
-/**
- * The logged-in mentor's own area: the 12-step wizard and the dashboard use the same endpoints
- * (each step is a PUT that replaces that part of the profile and answers with the new progress).
- */
 const router = Router();
 const photoUpload = uploadFile('photo');
 const cvUpload = uploadFile('cv');
 
-router.use(authenticate, authorize('MENTOR'), attachMentor);
+// All routes require a logged-in MENTOR.
+const mentorAuth = [authenticate, authorize('MENTOR')];
+// Routes that also need req.mentorId (profile must exist).
+const withProfile = [...mentorAuth, attachMentor];
 
-router.get('/', c.getProfile);
-router.delete('/', c.removeProfile);
-router.get('/onboarding', c.getOnboarding); // progress per step + profile strength
-router.get('/overview', c.getOverview); // dashboard "Overview"
-router.get('/bookings', validate(s.bookingsRangeSchema), c.listBookings); // "Sessions | Booked"
+// ── Routes that work even before a profile is created ──────────────────────
+// getOnboarding uses req.user.id only — no profile needed yet.
+router.get('/onboarding', ...mentorAuth, c.getOnboarding);
 
-// Wizard steps 1-12 (and the dashboard's Profile / Applied Universities / Background tabs)
-router.put('/source', validate(s.sourceSchema), c.saveSource); // 1
-router.put('/profile', validate(s.profileSchema), c.saveProfile); // 2
-router.post('/photo', ...photoUpload, c.uploadPhoto); // 2 (cropped image from the client)
-router.post('/cv', ...cvUpload, c.uploadCv);
-router.put('/location', validate(s.locationSchema), c.saveLocation); // 3
-router.put('/educations/abroad', validate(s.abroadEducationSchema), c.saveAbroad); // 4
-router.put('/educations/background', validate(s.backgroundEducationSchema), c.saveBackground); // 4
-router.put('/scholarships', validate(s.scholarshipsSchema), c.saveScholarships); // 5
-router.put('/expertise', validate(s.expertiseSchema), c.saveExpertise); // 6
-router.get('/availability', c.getAvailability); // 7
-router.put('/availability', validate(s.weeklyAvailabilitySchema), c.saveWeekly); // 7
-router.delete('/availability', c.clearAvailability);
-router.get('/availability/calendar', validate(s.calendarSchema), c.getCalendar);
-router.post('/availability/slots', validate(s.oneOffSlotSchema), c.addSlot);
-router.delete('/availability/slots/:slotId', validate(s.slotIdParams), c.deleteSlot);
-router.patch('/timezone', validate(s.timezoneSchemaBody), c.updateTimezoneHandler);
-router.put('/pricing', validate(s.pricingSchema), c.savePricing); // 8
-router.get('/payout', c.getPayout); // 9 (masked)
-router.put('/payout', validate(s.payoutSchema), c.savePayout); // 9
-router.put('/social', validate(s.socialSchema), c.saveSocial); // 10
-router.get('/preview', c.preview); // 11
-router.post('/publish', c.publish); // 11 "Continue" -> live
-router.put('/growth', validate(s.growthSchema), c.saveGrowth); // 12
-router.put('/experiences', validate(s.experiencesSchema), c.saveExperiences); // dashboard "Experiences" tab
+// ── Routes that require the profile to exist ───────────────────────────────
+router.get('/',         ...withProfile, c.getProfile);
+router.delete('/',      ...withProfile, c.removeProfile);
+router.get('/overview', ...withProfile, c.getOverview);
+router.get('/bookings', ...withProfile, validate(s.bookingsRangeSchema), c.listBookings);
+
+router.put('/source',              ...withProfile, validate(s.sourceSchema),             c.saveSource);
+router.put('/profile',             ...withProfile, validate(s.profileSchema),            c.saveProfile);
+router.post('/photo',              ...withProfile, ...photoUpload,                        c.uploadPhoto);
+router.post('/cv',                 ...withProfile, ...cvUpload,                           c.uploadCv);
+router.put('/location',            ...withProfile, validate(s.locationSchema),           c.saveLocation);
+router.put('/educations/abroad',   ...withProfile, validate(s.abroadEducationSchema),    c.saveAbroad);
+router.put('/educations/background',...withProfile, validate(s.backgroundEducationSchema), c.saveBackground);
+router.put('/scholarships',        ...withProfile, validate(s.scholarshipsSchema),       c.saveScholarships);
+router.put('/expertise',           ...withProfile, validate(s.expertiseSchema),          c.saveExpertise);
+router.get('/availability',        ...withProfile, c.getAvailability);
+router.put('/availability',        ...withProfile, validate(s.weeklyAvailabilitySchema), c.saveWeekly);
+router.delete('/availability',     ...withProfile, c.clearAvailability);
+router.get('/availability/calendar',...withProfile, validate(s.calendarSchema),          c.getCalendar);
+router.post('/availability/slots', ...withProfile, validate(s.oneOffSlotSchema),         c.addSlot);
+router.delete('/availability/slots/:slotId', ...withProfile, validate(s.slotIdParams),  c.deleteSlot);
+router.patch('/timezone',          ...withProfile, validate(s.timezoneSchemaBody),       c.updateTimezoneHandler);
+router.put('/pricing',             ...withProfile, validate(s.pricingSchema),            c.savePricing);
+router.get('/payout',              ...withProfile, c.getPayout);
+router.put('/payout',              ...withProfile, validate(s.payoutSchema),             c.savePayout);
+router.put('/social',              ...withProfile, validate(s.socialSchema),             c.saveSocial);
+router.get('/preview',             ...withProfile, c.preview);
+router.post('/publish',            ...withProfile, c.publish);
+router.put('/growth',              ...withProfile, validate(s.growthSchema),             c.saveGrowth);
+router.put('/experiences',         ...withProfile, validate(s.experiencesSchema),        c.saveExperiences);
 
 export default router;
