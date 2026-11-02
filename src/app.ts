@@ -32,6 +32,15 @@ app.use(sanitizeInput); // strips HTML from all user text
 app.use('/uploads/photos', express.static(path.join(UPLOAD_ROOT, 'photos'), { index: false, maxAge: '7d' }));
 
 // --- Routes -----------------------------------------------------------------
+// Friendly landing response: every API route lives under /api/v1.
+app.get('/', (_req, res) => {
+  res.json({
+    success: true,
+    service: 'AbroadMates API',
+    health: '/health',
+    api: '/api/v1',
+  });
+});
 app.get(
   '/health',
   catchAsync(async (_req, res) => {
