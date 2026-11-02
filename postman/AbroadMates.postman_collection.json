@@ -1,0 +1,4676 @@
+{
+  "info": {
+    "name": "AbroadMates API",
+    "description": "Run the folders top to bottom: \"1. Lookups\" stores option ids, \"2. Auth\" stores tokens, later folders reuse them. Seed accounts use password Password123 (student@example.com, mentor1..4@example.com are live mentors, mentor5@example.com is an empty draft for the wizard). In development emails are printed in the API console.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000/api/v1"
+    },
+    {
+      "key": "studentToken",
+      "value": ""
+    },
+    {
+      "key": "mentorToken",
+      "value": ""
+    },
+    {
+      "key": "draftMentorToken",
+      "value": ""
+    },
+    {
+      "key": "regEmail",
+      "value": ""
+    },
+    {
+      "key": "slotStart",
+      "value": ""
+    },
+    {
+      "key": "slotDate",
+      "value": ""
+    },
+    {
+      "key": "slotFrom",
+      "value": ""
+    },
+    {
+      "key": "slotTo",
+      "value": ""
+    },
+    {
+      "key": "fromDate",
+      "value": ""
+    },
+    {
+      "key": "toDate",
+      "value": ""
+    },
+    {
+      "key": "mentorSlug",
+      "value": ""
+    },
+    {
+      "key": "programId",
+      "value": "1"
+    },
+    {
+      "key": "fieldId",
+      "value": "1"
+    },
+    {
+      "key": "regionId",
+      "value": "1"
+    },
+    {
+      "key": "countryId",
+      "value": "1"
+    },
+    {
+      "key": "budgetRangeId",
+      "value": "1"
+    },
+    {
+      "key": "fundingNeedId",
+      "value": "1"
+    },
+    {
+      "key": "helpTopicId",
+      "value": "1"
+    },
+    {
+      "key": "sourceId",
+      "value": "1"
+    },
+    {
+      "key": "scholarshipId",
+      "value": "1"
+    },
+    {
+      "key": "service20Id",
+      "value": "1"
+    },
+    {
+      "key": "service40Id",
+      "value": "1"
+    },
+    {
+      "key": "categoryId",
+      "value": "1"
+    },
+    {
+      "key": "nationalityId",
+      "value": "1"
+    },
+    {
+      "key": "currentStatusId",
+      "value": "1"
+    },
+    {
+      "key": "graduatedStatusId",
+      "value": "1"
+    },
+    {
+      "key": "bgProgramId",
+      "value": "1"
+    },
+    {
+      "key": "marketBdId",
+      "value": "1"
+    },
+    {
+      "key": "marketIntlId",
+      "value": "1"
+    },
+    {
+      "key": "platformId",
+      "value": "1"
+    },
+    {
+      "key": "payoutMethodId",
+      "value": "1"
+    },
+    {
+      "key": "mentorId",
+      "value": "1"
+    },
+    {
+      "key": "bookingId",
+      "value": ""
+    },
+    {
+      "key": "sessionId",
+      "value": "1"
+    },
+    {
+      "key": "pastSessionId",
+      "value": "1"
+    },
+    {
+      "key": "newSessionId",
+      "value": ""
+    },
+    {
+      "key": "oneOffSlotId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Lookups (DB-driven options)",
+      "item": [
+        {
+          "name": "Student onboarding options (13 steps)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));",
+                  "const body = pm.response.json();",
+                  "pm.collectionVariables.set('programId', body.data.programs[0].id);",
+                  "pm.collectionVariables.set('fieldId', body.data.fields[0].id);",
+                  "pm.collectionVariables.set('regionId', body.data.regions[0].id);",
+                  "pm.collectionVariables.set('budgetRangeId', body.data.budgetRanges[0].id);",
+                  "pm.collectionVariables.set('fundingNeedId', body.data.fundingNeeds[0].id);",
+                  "pm.collectionVariables.set('helpTopicId', body.data.helpTopics[0].id);",
+                  "pm.collectionVariables.set('sourceId', body.data.sources[0].id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/lookups/onboarding-options",
+              "host": ["{{baseUrl}}"],
+              "path": ["lookups", "onboarding-options"]
+            }
+          }
+        },
+        {
+          "name": "Study destinations by region + has mentors (step 4)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));",
+                  "const body = pm.response.json();",
+                  "const g = body.data.find((c) => c.slug === 'germany'); if (g) pm.collectionVariables.set('countryId', g.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/lookups/countries?regionIds={{regionId}}&withMentors=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["lookups", "countries"],
+              "query": [
+                {
+                  "key": "regionIds",
+                  "value": "{{regionId}}"
+                },
+                {
+                  "key": "withMentors",
+                  "value": "true"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Every country in the world (nationality, location, bank)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));",
+                  "const body = pm.response.json();",
+                  "pm.test('many countries', () => pm.expect(body.data.length).to.be.above(150)); const bd = body.data.find((c) => c.isoCode === 'BD'); if (bd) pm.collectionVariables.set('nationalityId', bd.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/lookups/countries?all=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["lookups", "countries"],
+              "query": [
+                {
+                  "key": "all",
+                  "value": "true"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Country page - Germany (title + description)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/lookups/countries/germany",
+              "host": ["{{baseUrl}}"],
+              "path": ["lookups", "countries", "germany"]
+            }
+          }
+        },
+        {
+          "name": "Programs (degree levels)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/lookups/programs",
+              "host": ["{{baseUrl}}"],
+              "path": ["lookups", "programs"]
+            }
+          }
+        },
+        {
+          "name": "Scholarships",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));",
+                  "const body = pm.response.json();",
+                  "pm.collectionVariables.set('scholarshipId', body.data[0].id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/lookups/scholarships",
+              "host": ["{{baseUrl}}"],
+              "path": ["lookups", "scholarships"]
+            }
+          }
+        },
+        {
+          "name": "Scholarship page - DAAD",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/lookups/scholarships/daad-scholarships",
+              "host": ["{{baseUrl}}"],
+              "path": ["lookups", "scholarships", "daad-scholarships"]
+            }
+          }
+        },
+        {
+          "name": "Services (20 / 40 min)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));",
+                  "const body = pm.response.json();",
+                  "const s20 = body.data.find((s) => s.durationMin === 20); const s40 = body.data.find((s) => s.durationMin === 40); if (s20) pm.collectionVariables.set('service20Id', s20.id); if (s40) pm.collectionVariables.set('service40Id', s40.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/lookups/services",
+              "host": ["{{baseUrl}}"],
+              "path": ["lookups", "services"]
+            }
+          }
+        },
+        {
+          "name": "Pricing markets (BDT / USD, 30% fee, recommended prices)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));",
+                  "const body = pm.response.json();",
+                  "const bd = body.data.find((m) => m.currency === 'BDT'); const intl = body.data.find((m) => m.currency === 'USD'); if (bd) pm.collectionVariables.set('marketBdId', bd.id); if (intl) pm.collectionVariables.set('marketIntlId', intl.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/lookups/pricing-markets",
+              "host": ["{{baseUrl}}"],
+              "path": ["lookups", "pricing-markets"]
+            }
+          }
+        },
+        {
+          "name": "Mentor wizard options",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));",
+                  "const body = pm.response.json();",
+                  "const d = body.data; const set = (k, v) => v && pm.collectionVariables.set(k, v.id);",
+                  "set('currentStatusId', d.educationStatuses.find((s) => s.isCurrent)); set('graduatedStatusId', d.educationStatuses.find((s) => !s.isCurrent));",
+                  "set('bgProgramId', d.programs.find((p) => p.isBackgroundOnly)); set('platformId', d.socialPlatforms.find((p) => p.slug === 'linkedin')); set('payoutMethodId', d.payoutMethods.find((m) => m.slug === 'paypal'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/lookups/mentor-onboarding-options",
+              "host": ["{{baseUrl}}"],
+              "path": ["lookups", "mentor-onboarding-options"]
+            }
+          }
+        },
+        {
+          "name": "Session categories",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));",
+                  "const body = pm.response.json();",
+                  "pm.collectionVariables.set('categoryId', body.data[0].id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/lookups/session-categories",
+              "host": ["{{baseUrl}}"],
+              "path": ["lookups", "session-categories"]
+            }
+          }
+        },
+        {
+          "name": "Time zones",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));",
+                  "const body = pm.response.json();",
+                  "pm.test('has Asia/Dhaka', () => pm.expect(body.data).to.include('Asia/Dhaka'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/lookups/timezones",
+              "host": ["{{baseUrl}}"],
+              "path": ["lookups", "timezones"]
+            }
+          }
+        },
+        {
+          "name": "Universities for a country (external API, searchable)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));",
+                  "const body = pm.response.json();",
+                  "pm.test('is a list', () => pm.expect(body.data).to.be.an('array'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/lookups/universities?countryId={{countryId}}&search=technical",
+              "host": ["{{baseUrl}}"],
+              "path": ["lookups", "universities"],
+              "query": [
+                {
+                  "key": "countryId",
+                  "value": "{{countryId}}"
+                },
+                {
+                  "key": "search",
+                  "value": "technical"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Auth (sign-up, verification, login)",
+      "item": [
+        {
+          "name": "Register student (onboarding + account)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "[\"programId\",\"fieldId\",\"regionId\",\"countryId\",\"budgetRangeId\",\"fundingNeedId\",\"helpTopicId\",\"sourceId\",\"scholarshipId\",\"service20Id\",\"service40Id\",\"categoryId\",\"nationalityId\",\"currentStatusId\",\"graduatedStatusId\",\"bgProgramId\",\"marketBdId\",\"marketIntlId\",\"platformId\",\"payoutMethodId\",\"mentorId\"].forEach((k) => { pm.request.body.raw = pm.request.body.raw.split('\"{{' + k + '}}\"').join(pm.collectionVariables.get(k)); });",
+                  "pm.collectionVariables.set('regEmail', 'student' + Date.now() + '@example.com');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 201', () => pm.response.to.have.status(201));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));",
+                  "const body = pm.response.json();",
+                  "pm.test('verification required', () => pm.expect(body.data.verificationRequired).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Test\",\n  \"lastName\": \"Student\",\n  \"email\": \"{{regEmail}}\",\n  \"password\": \"Password123\",\n  \"confirmPassword\": \"Password123\",\n  \"acceptTerms\": true,\n  \"onboarding\": {\n    \"programId\": \"{{programId}}\",\n    \"fieldIds\": [\n      \"{{fieldId}}\"\n    ],\n    \"regionIds\": [\n      \"{{regionId}}\"\n    ],\n    \"countryIds\": [\n      \"{{countryId}}\"\n    ],\n    \"countriesOther\": false,\n    \"budgetRangeId\": \"{{budgetRangeId}}\",\n    \"fundingNeedId\": \"{{fundingNeedId}}\",\n    \"workWhileStudying\": true,\n    \"stayAfterStudy\": \"YES\",\n    \"ielts\": {\n      \"taken\": true,\n      \"score\": 7.5\n    },\n    \"applyMode\": \"ASSISTED\",\n    \"helpTopicIds\": [\n      \"{{helpTopicId}}\"\n    ],\n    \"timezone\": \"Asia/Dhaka\",\n    \"sourceId\": \"{{sourceId}}\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Login before verifying (expect 403 EMAIL_NOT_VERIFIED)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 403', () => pm.response.to.have.status(403));",
+                  "pm.test('code', () => pm.expect(pm.response.json().code).to.eql('EMAIL_NOT_VERIFIED'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{regEmail}}\",\n  \"password\": \"Password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Register mentor (full name, email, password)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 201', () => pm.response.to.have.status(201));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));",
+                  "const body = pm.response.json();",
+                  "pm.test('token + verification flag', () => { pm.expect(body.data.token).to.be.a('string'); pm.expect(body.data.verificationRequired).to.eql(true); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Test Mentor\",\n  \"email\": \"mentor{{$timestamp}}@example.com\",\n  \"password\": \"Password123\",\n  \"confirmPassword\": \"Password123\",\n  \"acceptTerms\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register/mentor",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register", "mentor"]
+            }
+          }
+        },
+        {
+          "name": "Resend verification email",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{regEmail}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/resend-verification",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "resend-verification"]
+            }
+          }
+        },
+        {
+          "name": "Verify email with a bad token (expect 400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/verify-email",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "verify-email"]
+            }
+          }
+        },
+        {
+          "name": "Register with mismatched passwords (expect 400)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "[\"programId\",\"fieldId\",\"regionId\",\"countryId\",\"budgetRangeId\",\"fundingNeedId\",\"helpTopicId\",\"sourceId\",\"scholarshipId\",\"service20Id\",\"service40Id\",\"categoryId\",\"nationalityId\",\"currentStatusId\",\"graduatedStatusId\",\"bgProgramId\",\"marketBdId\",\"marketIntlId\",\"platformId\",\"payoutMethodId\",\"mentorId\"].forEach((k) => { pm.request.body.raw = pm.request.body.raw.split('\"{{' + k + '}}\"').join(pm.collectionVariables.get(k)); });"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"A\",\n  \"lastName\": \"B\",\n  \"email\": \"x@example.com\",\n  \"password\": \"Password123\",\n  \"confirmPassword\": \"Different123\",\n  \"acceptTerms\": true,\n  \"onboarding\": {\n    \"programId\": \"{{programId}}\",\n    \"fieldIds\": [\n      \"{{fieldId}}\"\n    ],\n    \"regionIds\": [\n      \"{{regionId}}\"\n    ],\n    \"countryIds\": [\n      \"{{countryId}}\"\n    ],\n    \"countriesOther\": false,\n    \"budgetRangeId\": \"{{budgetRangeId}}\",\n    \"fundingNeedId\": \"{{fundingNeedId}}\",\n    \"workWhileStudying\": true,\n    \"stayAfterStudy\": \"YES\",\n    \"ielts\": {\n      \"taken\": true,\n      \"score\": 7.5\n    },\n    \"applyMode\": \"ASSISTED\",\n    \"helpTopicIds\": [\n      \"{{helpTopicId}}\"\n    ],\n    \"timezone\": \"Asia/Dhaka\",\n    \"sourceId\": \"{{sourceId}}\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Forgot password",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"student@example.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/forgot-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "forgot-password"]
+            }
+          }
+        },
+        {
+          "name": "Reset password with a bad token (expect 400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\n  \"password\": \"NewPassword123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/reset-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "reset-password"]
+            }
+          }
+        },
+        {
+          "name": "Login - seeded student",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));",
+                  "const body = pm.response.json();",
+                  "pm.collectionVariables.set('studentToken', body.data.token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"student@example.com\",\n  \"password\": \"Password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Login - live mentor (mentor1)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));",
+                  "const body = pm.response.json();",
+                  "pm.collectionVariables.set('mentorToken', body.data.token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"mentor1@example.com\",\n  \"password\": \"Password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Login - draft mentor for the wizard (mentor5)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));",
+                  "const body = pm.response.json();",
+                  "pm.collectionVariables.set('draftMentorToken', body.data.token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"mentor5@example.com\",\n  \"password\": \"Password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Login - wrong password (expect 401)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"student@example.com\",\n  \"password\": \"WrongPass1\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Me",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "me"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Mentor wizard (12 steps, mentor5)",
+      "item": [
+        {
+          "name": "Progress (all steps open)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{draftMentorToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/mentors/me/onboarding",
+              "host": ["{{baseUrl}}"],
+              "path": ["mentors", "me", "onboarding"]
+            }
+          }
+        },
+        {
+          "name": "1. Source",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "[\"programId\",\"fieldId\",\"regionId\",\"countryId\",\"budgetRangeId\",\"fundingNeedId\",\"helpTopicId\",\"sourceId\",\"scholarshipId\",\"service20Id\",\"service40Id\",\"categoryId\",\"nationalityId\",\"currentStatusId\",\"graduatedStatusId\",\"bgProgramId\",\"marketBdId\",\"marketIntlId\",\"platformId\",\"payoutMethodId\",\"mentorId\"].forEach((k) => { pm.request.body.raw = pm.request.body.raw.split('\"{{' + k + '}}\"').join(pm.collectionVariables.get(k)); });"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{draftMentorToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sourceId\": \"{{sourceId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/mentors/me/source",
+              "host": ["{{baseUrl}}"],
+              "path": ["mentors", "me", "source"]
+            }
+          }
+        },
+        {
+          "name": "2. Basic profile",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "[\"programId\",\"fieldId\",\"regionId\",\"countryId\",\"budgetRangeId\",\"fundingNeedId\",\"helpTopicId\",\"sourceId\",\"scholarshipId\",\"service20Id\",\"service40Id\",\"categoryId\",\"nationalityId\",\"currentStatusId\",\"graduatedStatusId\",\"bgProgramId\",\"marketBdId\",\"marketIntlId\",\"platformId\",\"payoutMethodId\",\"mentorId\"].forEach((k) => { pm.request.body.raw = pm.request.body.raw.split('\"{{' + k + '}}\"').join(pm.collectionVariables.get(k)); });"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{draftMentorToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Sara\",\n  \"middleName\": \"\",\n  \"lastName\": \"Ali\",\n  \"nationalityId\": \"{{nationalityId}}\",\n  \"phone\": \"+8801700000005\",\n  \"sellingPoint\": \"I moved abroad for my master's and I can guide you through every step.\",\n  \"photoCrop\": {\n    \"zoom\": 1.2,\n    \"x\": 0,\n    \"y\": 0\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/mentors/me/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["mentors", "me", "profile"]
+            }
+          }
+        },
+        {
+          "name": "2. Profile photo (choose a .jpg/.png)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{draftMentorToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/mentors/me/photo",
+              "host": ["{{baseUrl}}"],
+              "path": ["mentors", "me", "photo"]
+            }
+          }
+        },
+        {
+          "name": "2. CV (choose a .pdf)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{draftMentorToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/mentors/me/cv",
+              "host": ["{{baseUrl}}"],
+              "path": ["mentors", "me", "cv"]
+            }
+          }
+        },
+        {
+          "name": "3. Location",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "[\"programId\",\"fieldId\",\"regionId\",\"countryId\",\"budgetRangeId\",\"fundingNeedId\",\"helpTopicId\",\"sourceId\",\"scholarshipId\",\"service20Id\",\"service40Id\",\"categoryId\",\"nationalityId\",\"currentStatusId\",\"graduatedStatusId\",\"bgProgramId\",\"marketBdId\",\"marketIntlId\",\"platformId\",\"payoutMethodId\",\"mentorId\"].forEach((k) => { pm.request.body.raw = pm.request.body.raw.split('\"{{' + k + '}}\"').join(pm.collectionVariables.get(k)); });"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{draftMentorToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"current\": {\n    \"street\": \"Purba Saptana\",\n    \"city\": \"Dhaka\",\n    \"countryId\": \"{{nationalityId}}\"\n  },\n  \"permanent\": {\n    \"sameAsCurrent\": true\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/mentors/me/location",
+              "host": ["{{baseUrl}}"],
+              "path": ["mentors", "me", "location"]
+            }
+          }
+        },
+        {
+          "name": "4. University degree abroad",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "[\"programId\",\"fieldId\",\"regionId\",\"countryId\",\"budgetRangeId\",\"fundingNeedId\",\"helpTopicId\",\"sourceId\",\"scholarshipId\",\"service20Id\",\"service40Id\",\"categoryId\",\"nationalityId\",\"currentStatusId\",\"graduatedStatusId\",\"bgProgramId\",\"marketBdId\",\"marketIntlId\",\"platformId\",\"payoutMethodId\",\"mentorId\"].forEach((k) => { pm.request.body.raw = pm.request.body.raw.split('\"{{' + k + '}}\"').join(pm.collectionVariables.get(k)); });"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{draftMentorToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"educations\": [\n    {\n      \"universityName\": \"Technical University of Munich\",\n      \"countryId\": \"{{countryId}}\",\n      \"statusId\": \"{{currentStatusId}}\",\n      \"programId\": \"{{programId}}\",\n      \"fieldOfStudy\": \"Computer Science\",\n      \"admissionYear\": 2022,\n      \"city\": \"Munich\",\n      \"scholarshipNote\": \"Merit bursary\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/mentors/me/educations/abroad",
+              "host": ["{{baseUrl}}"],
+              "path": ["mentors", "me", "educations", "abroad"]
+            }
+          }
+        },
+        {
+          "name": "4. Own-country background (high school)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "[\"programId\",\"fieldId\",\"regionId\",\"countryId\",\"budgetRangeId\",\"fundingNeedId\",\"helpTopicId\",\"sourceId\",\"scholarshipId\",\"service20Id\",\"service40Id\",\"categoryId\",\"nationalityId\",\"currentStatusId\",\"graduatedStatusId\",\"bgProgramId\",\"marketBdId\",\"marketIntlId\",\"platformId\",\"payoutMethodId\",\"mentorId\"].forEach((k) => { pm.request.body.raw = pm.request.body.raw.split('\"{{' + k + '}}\"').join(pm.collectionVariables.get(k)); });"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{draftMentorToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"educations\": [\n    {\n      \"universityName\": \"Dhaka College\",\n      \"countryId\": \"{{nationalityId}}\",\n      \"statusId\": \"{{graduatedStatusId}}\",\n      \"programId\": \"{{bgProgramId}}\",\n      \"fieldOfStudy\": \"Science\",\n      \"admissionYear\": 2016,\n      \"graduationYear\": 2018\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/mentors/me/educations/background",
+              "host": ["{{baseUrl}}"],
+              "path": ["mentors", "me", "educations", "background"]
+            }
+          }
+        },
+        {
+          "name": "4. Abroad degree in own country (expect 400)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "[\"programId\",\"fieldId\",\"regionId\",\"countryId\",\"budgetRangeId\",\"fundingNeedId\",\"helpTopicId\",\"sourceId\",\"scholarshipId\",\"service20Id\",\"service40Id\",\"categoryId\",\"nationalityId\",\"currentStatusId\",\"graduatedStatusId\",\"bgProgramId\",\"marketBdId\",\"marketIntlId\",\"platformId\",\"payoutMethodId\",\"mentorId\"].forEach((k) => { pm.request.body.raw = pm.request.body.raw.split('\"{{' + k + '}}\"').join(pm.collectionVariables.get(k)); });"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{draftMentorToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"educations\": [\n    {\n      \"universityName\": \"Dhaka University\",\n      \"countryId\": \"{{nationalityId}}\",\n      \"statusId\": \"{{currentStatusId}}\",\n      \"programId\": \"{{programId}}\",\n      \"fieldOfStudy\": \"CSE\",\n      \"admissionYear\": 2022\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/mentors/me/educations/abroad",
+              "host": ["{{baseUrl}}"],
+              "path": ["mentors", "me", "educations", "abroad"]
+            }
+          }
+        },
+        {
+          "name": "5. Scholarship programs",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "[\"programId\",\"fieldId\",\"regionId\",\"countryId\",\"budgetRangeId\",\"fundingNeedId\",\"helpTopicId\",\"sourceId\",\"scholarshipId\",\"service20Id\",\"service40Id\",\"categoryId\",\"nationalityId\",\"currentStatusId\",\"graduatedStatusId\",\"bgProgramId\",\"marketBdId\",\"marketIntlId\",\"platformId\",\"payoutMethodId\",\"mentorId\"].forEach((k) => { pm.request.body.raw = pm.request.body.raw.split('\"{{' + k + '}}\"').join(pm.collectionVariables.get(k)); });"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{draftMentorToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"noScholarshipProgram\": false,\n  \"programs\": [\n    {\n      \"scholarshipId\": \"{{scholarshipId}}\",\n      \"outcome\": \"RECEIVED\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/mentors/me/scholarships",
+              "host": ["{{baseUrl}}"],
+              "path": ["mentors", "me", "scholarships"]
+            }
+          }
+        },
+        {
+          "name": "6. Expertise (how can you help)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "[\"programId\",\"fieldId\",\"regionId\",\"countryId\",\"budgetRangeId\",\"fundingNeedId\",\"helpTopicId\",\"sourceId\",\"scholarshipId\",\"service20Id\",\"service40Id\",\"categoryId\",\"nationalityId\",\"currentStatusId\",\"graduatedStatusId\",\"bgProgramId\",\"marketBdId\",\"marketIntlId\",\"platformId\",\"payoutMethodId\",\"mentorId\"].forEach((k) => { pm.request.body.raw = pm.request.body.raw.split('\"{{' + k + '}}\"').join(pm.collectionVariables.get(k)); });"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{draftMentorToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"helpTopicIds\": [\n    \"{{helpTopicId}}\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/mentors/me/expertise",
+              "host": ["{{baseUrl}}"],
+              "path": ["mentors", "me", "expertise"]
+            }
+          }
+        },
+        {
+          "name": "7. Weekly availability + time zone",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "[\"programId\",\"fieldId\",\"regionId\",\"countryId\",\"budgetRangeId\",\"fundingNeedId\",\"helpTopicId\",\"sourceId\",\"scholarshipId\",\"service20Id\",\"service40Id\",\"categoryId\",\"nationalityId\",\"currentStatusId\",\"graduatedStatusId\",\"bgProgramId\",\"marketBdId\",\"marketIntlId\",\"platformId\",\"payoutMethodId\",\"mentorId\"].forEach((k) => { pm.request.body.raw = pm.request.body.raw.split('\"{{' + k + '}}\"').join(pm.collectionVariables.get(k)); });"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{draftMentorToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"timezone\": \"Asia/Dhaka\",\n  \"weekly\": [\n    {\n      \"weekday\": 2,\n      \"ranges\": [\n        {\n          \"start\": \"09:00\",\n          \"end\": \"17:00\"\n        }\n      ]\n    },\n    {\n      \"weekday\": 5,\n      \"ranges\": [\n        {\n          \"start\": \"09:00\",\n          \"end\": \"12:00\"\n        },\n        {\n          \"start\": \"14:00\",\n          \"end\": \"17:00\"\n        }\n      ]\n    }\n  ],\n  \"availableUntil\": null\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/mentors/me/availability",
+              "host": ["{{baseUrl}}"],
+              "path": ["mentors", "me", "availability"]
+            }
+          }
+        },
+        {
+          "name": "7. Overlapping ranges (expect 400)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "[\"programId\",\"fieldId\",\"regionId\",\"countryId\",\"budgetRangeId\",\"fundingNeedId\",\"helpTopicId\",\"sourceId\",\"scholarshipId\",\"service20Id\",\"service40Id\",\"categoryId\",\"nationalityId\",\"currentStatusId\",\"graduatedStatusId\",\"bgProgramId\",\"marketBdId\",\"marketIntlId\",\"platformId\",\"payoutMethodId\",\"mentorId\"].forEach((k) => { pm.request.body.raw = pm.request.body.raw.split('\"{{' + k + '}}\"').join(pm.collectionVariables.get(k)); });"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{draftMentorToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"timezone\": \"Asia/Dhaka\",\n  \"weekly\": [\n    {\n      \"weekday\": 2,\n      \"ranges\": [\n        {\n          \"start\": \"09:00\",\n          \"end\": \"12:00\"\n        },\n        {\n          \"start\": \"11:00\",\n          \"end\": \"13:00\"\n        }\n      ]\n    }\n  ],\n  \"availableUntil\": null\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/mentors/me/availability",
+              "host": ["{{baseUrl}}"],
+              "path": ["mentors", "me", "availability"]
+            }
+          }
+        },
+        {
+          "name": "8. Pricing (BDT + USD, 20 + 40 min)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "[\"programId\",\"fieldId\",\"regionId\",\"countryId\",\"budgetRangeId\",\"fundingNeedId\",\"helpTopicId\",\"sourceId\",\"scholarshipId\",\"service20Id\",\"service40Id\",\"categoryId\",\"nationalityId\",\"currentStatusId\",\"graduatedStatusId\",\"bgProgramId\",\"marketBdId\",\"marketIntlId\",\"platformId\",\"payoutMethodId\",\"mentorId\"].forEach((k) => { pm.request.body.raw = pm.request.body.raw.split('\"{{' + k + '}}\"').join(pm.collectionVariables.get(k)); });"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{draftMentorToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"prices\": [\n    {\n      \"marketId\": \"{{marketBdId}}\",\n      \"serviceId\": \"{{service20Id}}\",\n      \"price\": 999\n    },\n    {\n      \"marketId\": \"{{marketBdId}}\",\n      \"serviceId\": \"{{service40Id}}\",\n      \"price\": 1999\n    },\n    {\n      \"marketId\": \"{{marketIntlId}}\",\n      \"serviceId\": \"{{service20Id}}\",\n      \"price\": 25\n    },\n    {\n      \"marketId\": \"{{marketIntlId}}\",\n      \"serviceId\": \"{{service40Id}}\",\n      \"price\": 40\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/mentors/me/pricing",
+              "host": ["{{baseUrl}}"],
+              "path": ["mentors", "me", "pricing"]
+            }
+          }
+        },
+        {
+          "name": "9. Payout (PayPal; details are encrypted)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "[\"programId\",\"fieldId\",\"regionId\",\"countryId\",\"budgetRangeId\",\"fundingNeedId\",\"helpTopicId\",\"sourceId\",\"scholarshipId\",\"service20Id\",\"service40Id\",\"categoryId\",\"nationalityId\",\"currentStatusId\",\"graduatedStatusId\",\"bgProgramId\",\"marketBdId\",\"marketIntlId\",\"platformId\",\"payoutMethodId\",\"mentorId\"].forEach((k) => { pm.request.body.raw = pm.request.body.raw.split('\"{{' + k + '}}\"').join(pm.collectionVariables.get(k)); });"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{draftMentorToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"methodId\": \"{{payoutMethodId}}\",\n  \"details\": {\n    \"email\": \"sara@example.com\"\n  },\n  \"confirmed\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/mentors/me/payout",
+              "host": ["{{baseUrl}}"],
+              "path": ["mentors", "me", "payout"]
+            }
+          }
+        },
+        {
+          "name": "9. Payout (masked hint only)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));",
+                  "const body = pm.response.json();",
+                  "pm.test('never returns raw details', () => pm.expect(JSON.stringify(body.data)).to.not.include('sara@example.com'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{draftMentorToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/mentors/me/payout",
+              "host": ["{{baseUrl}}"],
+              "path": ["mentors", "me", "payout"]
+            }
+          }
+        },
+        {
+          "name": "10. Social links (host must match platform)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "[\"programId\",\"fieldId\",\"regionId\",\"countryId\",\"budgetRangeId\",\"fundingNeedId\",\"helpTopicId\",\"sourceId\",\"scholarshipId\",\"service20Id\",\"service40Id\",\"categoryId\",\"nationalityId\",\"currentStatusId\",\"graduatedStatusId\",\"bgProgramId\",\"marketBdId\",\"marketIntlId\",\"platformId\",\"payoutMethodId\",\"mentorId\"].forEach((k) => { pm.request.body.raw = pm.request.body.raw.split('\"{{' + k + '}}\"').join(pm.collectionVariables.get(k)); });"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{draftMentorToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"links\": [\n    {\n      \"platformId\": \"{{platformId}}\",\n      \"url\": \"https://www.linkedin.com/in/sara-ali\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/mentors/me/social",
+              "host": ["{{baseUrl}}"],
+              "path": ["mentors", "me", "social"]
+            }
+          }
+        },
+        {
+          "name": "10. Wrong platform host (expect 400)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "[\"programId\",\"fieldId\",\"regionId\",\"countryId\",\"budgetRangeId\",\"fundingNeedId\",\"helpTopicId\",\"sourceId\",\"scholarshipId\",\"service20Id\",\"service40Id\",\"categoryId\",\"nationalityId\",\"currentStatusId\",\"graduatedStatusId\",\"bgProgramId\",\"marketBdId\",\"marketIntlId\",\"platformId\",\"payoutMethodId\",\"mentorId\"].forEach((k) => { pm.request.body.raw = pm.request.body.raw.split('\"{{' + k + '}}\"').join(pm.collectionVariables.get(k)); });"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{draftMentorToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"links\": [\n    {\n      \"platformId\": \"{{platformId}}\",\n      \"url\": \"https://evil.example.com/sara\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/mentors/me/social",
+              "host": ["{{baseUrl}}"],
+              "path": ["mentors", "me", "social"]
+            }
+          }
+        },
+        {
+          "name": "11. Preview Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));",
+                  "const body = pm.response.json();",
+                  "pm.test('has pricing for both markets', () => pm.expect(body.data.pricing.length).to.eql(2));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{draftMentorToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/mentors/me/preview",
+              "host": ["{{baseUrl}}"],
+              "path": ["mentors", "me", "preview"]
+            }
+          }
+        },
+        {
+          "name": "11. Publish (go live)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));",
+                  "const body = pm.response.json();",
+                  "pm.test('live', () => pm.expect(body.data.status).to.eql('LIVE')); pm.collectionVariables.set('mentorSlug', body.data.slug);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{draftMentorToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/mentors/me/publish",
+              "host": ["{{baseUrl}}"],
+              "path": ["mentors", "me", "publish"]
+            }
+          }
+        },
+        {
+          "name": "12. Growth: shared on social?",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "[\"programId\",\"fieldId\",\"regionId\",\"countryId\",\"budgetRangeId\",\"fundingNeedId\",\"helpTopicId\",\"sourceId\",\"scholarshipId\",\"service20Id\",\"service40Id\",\"categoryId\",\"nationalityId\",\"currentStatusId\",\"graduatedStatusId\",\"bgProgramId\",\"marketBdId\",\"marketIntlId\",\"platformId\",\"payoutMethodId\",\"mentorId\"].forEach((k) => { pm.request.body.raw = pm.request.body.raw.split('\"{{' + k + '}}\"').join(pm.collectionVariables.get(k)); });"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{draftMentorToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sharedOnSocial\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/mentors/me/growth",
+              "host": ["{{baseUrl}}"],
+              "path": ["mentors", "me", "growth"]
+            }
+          }
+        },
+        {
+          "name": "Dashboard Experiences tab",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{draftMentorToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"experiences\": [\n    {\n      \"kind\": \"ACTIVITY\",\n      \"title\": \"Debate club\",\n      \"organization\": \"University of Dhaka\",\n      \"startYear\": 2019,\n      \"endYear\": 2021\n    },\n    {\n      \"kind\": \"WORK\",\n      \"title\": \"Intern\",\n      \"organization\": \"Tech Co\",\n      \"startYear\": 2021\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/mentors/me/experiences",
+              "host": ["{{baseUrl}}"],
+              "path": ["mentors", "me", "experiences"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Mentor dashboard",
+      "item": [
+        {
+          "name": "Overview (stats, upcoming, weekly hours, top days)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));",
+                  "const body = pm.response.json();",
+                  "pm.test('stats + 4 weeks', () => { pm.expect(body.data.stats.totalStudents).to.be.a('number'); pm.expect(body.data.weeklyHours.length).to.eql(4); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{mentorToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/mentors/me/overview",
+              "host": ["{{baseUrl}}"],
+              "path": ["mentors", "me", "overview"]
+            }
+          }
+        },
+        {
+          "name": "Profile strength + progress",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));",
+                  "const body = pm.response.json();",
+                  "pm.test('percent', () => pm.expect(body.data.strength.percent).to.be.a('number'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{mentorToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/mentors/me/onboarding",
+              "host": ["{{baseUrl}}"],
+              "path": ["mentors", "me", "onboarding"]
+            }
+          }
+        },
+        {
+          "name": "Availability (weekly + one-off)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{mentorToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/mentors/me/availability",
+              "host": ["{{baseUrl}}"],
+              "path": ["mentors", "me", "availability"]
+            }
+          }
+        },
+        {
+          "name": "Availability calendar (orange / red days)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const d = (n) => new Date(Date.now() + n * 864e5).toISOString().slice(0, 10);",
+                  "pm.collectionVariables.set('fromDate', d(0)); pm.collectionVariables.set('toDate', d(40)); pm.collectionVariables.set('slotDate', d(2));",
+                  "pm.collectionVariables.set('slotFrom', new Date(Date.now() + 864e5).toISOString()); pm.collectionVariables.set('slotTo', new Date(Date.now() + 9 * 864e5).toISOString());"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{mentorToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/mentors/me/availability/calendar?from={{fromDate}}&to={{toDate}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["mentors", "me", "availability", "calendar"],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "{{fromDate}}"
+                },
+                {
+                  "key": "to",
+                  "value": "{{toDate}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Add one-off slot",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const d = (n) => new Date(Date.now() + n * 864e5).toISOString().slice(0, 10);",
+                  "pm.collectionVariables.set('fromDate', d(0)); pm.collectionVariables.set('toDate', d(40)); pm.collectionVariables.set('slotDate', d(2));",
+                  "pm.collectionVariables.set('slotFrom', new Date(Date.now() + 864e5).toISOString()); pm.collectionVariables.set('slotTo', new Date(Date.now() + 9 * 864e5).toISOString());"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 201', () => pm.response.to.have.status(201));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));",
+                  "const body = pm.response.json();",
+                  "pm.collectionVariables.set('oneOffSlotId', body.data.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{mentorToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"date\": \"{{slotDate}}\",\n  \"start\": \"18:00\",\n  \"end\": \"20:00\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/mentors/me/availability/slots",
+              "host": ["{{baseUrl}}"],
+              "path": ["mentors", "me", "availability", "slots"]
+            }
+          }
+        },
+        {
+          "name": "Delete one-off slot",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{mentorToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/mentors/me/availability/slots/{{oneOffSlotId}}",
+              "host": ["{{baseUrl}}"],
+              "path": [
+                "mentors",
+                "me",
+                "availability",
+                "slots",
+                "{{oneOffSlotId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Save time zone",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{mentorToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"timezone\": \"Europe/Berlin\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/mentors/me/timezone",
+              "host": ["{{baseUrl}}"],
+              "path": ["mentors", "me", "timezone"]
+            }
+          }
+        },
+        {
+          "name": "Sessions | Booked (next 62 days)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{mentorToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/mentors/me/bookings",
+              "host": ["{{baseUrl}}"],
+              "path": ["mentors", "me", "bookings"]
+            }
+          }
+        },
+        {
+          "name": "Sessions | Host",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{mentorToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sessions/hosted",
+              "host": ["{{baseUrl}}"],
+              "path": ["sessions", "hosted"]
+            }
+          }
+        },
+        {
+          "name": "Student cannot open mentor dashboard (expect 403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/mentors/me/overview",
+              "host": ["{{baseUrl}}"],
+              "path": ["mentors", "me", "overview"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Student dashboard",
+      "item": [
+        {
+          "name": "Overview (profile, referral, what's coming up)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));",
+                  "const body = pm.response.json();",
+                  "pm.test('has counts', () => pm.expect(body.data.counts.all).to.be.a('number'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/students/me/overview",
+              "host": ["{{baseUrl}}"],
+              "path": ["students", "me", "overview"]
+            }
+          }
+        },
+        {
+          "name": "Profile Info",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/students/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["students", "me"]
+            }
+          }
+        },
+        {
+          "name": "Update profile Info",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "[\"programId\",\"fieldId\",\"regionId\",\"countryId\",\"budgetRangeId\",\"fundingNeedId\",\"helpTopicId\",\"sourceId\",\"scholarshipId\",\"service20Id\",\"service40Id\",\"categoryId\",\"nationalityId\",\"currentStatusId\",\"graduatedStatusId\",\"bgProgramId\",\"marketBdId\",\"marketIntlId\",\"platformId\",\"payoutMethodId\",\"mentorId\"].forEach((k) => { pm.request.body.raw = pm.request.body.raw.split('\"{{' + k + '}}\"').join(pm.collectionVariables.get(k)); });"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Demo\",\n  \"lastName\": \"Student\",\n  \"onboarding\": {\n    \"programId\": \"{{programId}}\",\n    \"fieldIds\": [\n      \"{{fieldId}}\"\n    ],\n    \"regionIds\": [\n      \"{{regionId}}\"\n    ],\n    \"countryIds\": [\n      \"{{countryId}}\"\n    ],\n    \"countriesOther\": false,\n    \"budgetRangeId\": \"{{budgetRangeId}}\",\n    \"fundingNeedId\": \"{{fundingNeedId}}\",\n    \"workWhileStudying\": true,\n    \"stayAfterStudy\": \"YES\",\n    \"ielts\": {\n      \"taken\": false\n    },\n    \"applyMode\": \"SELF\",\n    \"helpTopicIds\": [],\n    \"timezone\": \"Asia/Dhaka\",\n    \"sourceId\": \"{{sourceId}}\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/students/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["students", "me"]
+            }
+          }
+        },
+        {
+          "name": "Save time zone",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"timezone\": \"Asia/Dhaka\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/students/me/timezone",
+              "host": ["{{baseUrl}}"],
+              "path": ["students", "me", "timezone"]
+            }
+          }
+        },
+        {
+          "name": "Calendar: schedule for the next 31 days",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/students/me/schedule",
+              "host": ["{{baseUrl}}"],
+              "path": ["students", "me", "schedule"]
+            }
+          }
+        },
+        {
+          "name": "Schedule - only 1:1 sessions",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/students/me/schedule?type=ONE_ON_ONE",
+              "host": ["{{baseUrl}}"],
+              "path": ["students", "me", "schedule"],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "ONE_ON_ONE"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Save a mentor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/students/me/saved-mentors/{{mentorId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["students", "me", "saved-mentors", "{{mentorId}}"]
+            }
+          }
+        },
+        {
+          "name": "Saved Mentors",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));",
+                  "const body = pm.response.json();",
+                  "pm.test('mentor is saved', () => pm.expect(body.data.some((m) => m.isSaved)).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/students/me/saved-mentors",
+              "host": ["{{baseUrl}}"],
+              "path": ["students", "me", "saved-mentors"]
+            }
+          }
+        },
+        {
+          "name": "Remove saved mentor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/students/me/saved-mentors/{{mentorId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["students", "me", "saved-mentors", "{{mentorId}}"]
+            }
+          }
+        },
+        {
+          "name": "Mentor cannot open student dashboard (expect 403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{mentorToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/students/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["students", "me"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Notifications",
+      "item": [
+        {
+          "name": "Bell: list (meta.unreadCount)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));",
+                  "const body = pm.response.json();",
+                  "pm.test('unread count', () => pm.expect(body.meta.unreadCount).to.be.a('number'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/notifications",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications"]
+            }
+          }
+        },
+        {
+          "name": "Mark all read",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/read-all",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications", "read-all"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Find a mentor (public)",
+      "item": [
+        {
+          "name": "List mentors (prices in the viewer's currency)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));",
+                  "const body = pm.response.json();",
+                  "pm.test('BDT for a Dhaka student', () => pm.expect(body.data[0].currency).to.eql('BDT')); pm.test('pagination meta', () => pm.expect(body.meta.total).to.be.a('number'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/mentors",
+              "host": ["{{baseUrl}}"],
+              "path": ["mentors"]
+            }
+          }
+        },
+        {
+          "name": "List mentors anonymously (default market, USD)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));",
+                  "const body = pm.response.json();",
+                  "pm.test('USD', () => pm.expect(body.data[0].currency).to.eql('USD'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/mentors",
+              "host": ["{{baseUrl}}"],
+              "path": ["mentors"]
+            }
+          }
+        },
+        {
+          "name": "Filter: Germany + Master's + 40 min + DAAD",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/mentors?country=germany&program=masters&service=40-min-call&scholarship=daad-scholarships",
+              "host": ["{{baseUrl}}"],
+              "path": ["mentors"],
+              "query": [
+                {
+                  "key": "country",
+                  "value": "germany"
+                },
+                {
+                  "key": "program",
+                  "value": "masters"
+                },
+                {
+                  "key": "service",
+                  "value": "40-min-call"
+                },
+                {
+                  "key": "scholarship",
+                  "value": "daad-scholarships"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Search by name or university",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/mentors?search=toronto",
+              "host": ["{{baseUrl}}"],
+              "path": ["mentors"],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "toronto"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Sort: price low to high",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/mentors?sort=price_asc",
+              "host": ["{{baseUrl}}"],
+              "path": ["mentors"],
+              "query": [
+                {
+                  "key": "sort",
+                  "value": "price_asc"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Sort: most sessions",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/mentors?sort=most_sessions",
+              "host": ["{{baseUrl}}"],
+              "path": ["mentors"],
+              "query": [
+                {
+                  "key": "sort",
+                  "value": "most_sessions"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Sort: top rated + pagination",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/mentors?sort=top_rated&page=1&limit=2",
+              "host": ["{{baseUrl}}"],
+              "path": ["mentors"],
+              "query": [
+                {
+                  "key": "sort",
+                  "value": "top_rated"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "2"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Mentor profile by id",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));",
+                  "const body = pm.response.json();",
+                  "pm.collectionVariables.set('mentorSlug', body.data.slug); pm.test('full profile', () => { pm.expect(body.data.educations.length).to.be.above(0); pm.expect(body.data.pricing.length).to.eql(2); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/mentors/{{mentorId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["mentors", "{{mentorId}}"]
+            }
+          }
+        },
+        {
+          "name": "Public profile link (abroadmates.com/<slug>)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/mentors/profile/{{mentorSlug}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["mentors", "profile", "{{mentorSlug}}"]
+            }
+          }
+        },
+        {
+          "name": "Invalid sort (expect 400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/mentors?sort=hacked;DROP TABLE users",
+              "host": ["{{baseUrl}}"],
+              "path": ["mentors"],
+              "query": [
+                {
+                  "key": "sort",
+                  "value": "hacked;DROP TABLE users"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "SQL-injection attempt in search is just text (expect 200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/mentors?search=' OR 1=1 --",
+              "host": ["{{baseUrl}}"],
+              "path": ["mentors"],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "' OR 1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Public link of the mentor published in folder 3",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));",
+                  "const body = pm.response.json();",
+                  "pm.test('live', () => pm.expect(body.data.status).to.eql('LIVE'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/mentors/profile/sara-ali-000001",
+              "host": ["{{baseUrl}}"],
+              "path": ["mentors", "profile", "sara-ali-000001"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "8. Export",
+      "item": [
+        {
+          "name": "Export mentors - Excel",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/mentors/export/excel?country=germany",
+              "host": ["{{baseUrl}}"],
+              "path": ["mentors", "export", "excel"],
+              "query": [
+                {
+                  "key": "country",
+                  "value": "germany"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Export mentors - PDF",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/mentors/export/pdf",
+              "host": ["{{baseUrl}}"],
+              "path": ["mentors", "export", "pdf"]
+            }
+          }
+        },
+        {
+          "name": "Export without token (expect 401)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/mentors/export/pdf",
+              "host": ["{{baseUrl}}"],
+              "path": ["mentors", "export", "pdf"]
+            }
+          }
+        },
+        {
+          "name": "Download a mentor CV",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 if the mentor uploaded a CV, else 404', () => pm.expect([200, 404]).to.include(pm.response.code));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/mentors/{{mentorId}}/cv",
+              "host": ["{{baseUrl}}"],
+              "path": ["mentors", "{{mentorId}}", "cv"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "9. Booking (student)",
+      "item": [
+        {
+          "name": "Free slots of a mentor for the 20 min call",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const d = (n) => new Date(Date.now() + n * 864e5).toISOString().slice(0, 10);",
+                  "pm.collectionVariables.set('fromDate', d(0)); pm.collectionVariables.set('toDate', d(40)); pm.collectionVariables.set('slotDate', d(2));",
+                  "pm.collectionVariables.set('slotFrom', new Date(Date.now() + 864e5).toISOString()); pm.collectionVariables.set('slotTo', new Date(Date.now() + 9 * 864e5).toISOString());"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));",
+                  "const body = pm.response.json();",
+                  "pm.test('has slots', () => pm.expect(body.data.length).to.be.above(2)); pm.collectionVariables.set('slotStart', body.data[body.data.length > 3 ? Math.floor(Math.random() * body.data.length) : 0].startsAt);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/mentors/{{mentorId}}/slots?from={{slotFrom}}&to={{slotTo}}&serviceId={{service20Id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["mentors", "{{mentorId}}", "slots"],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "{{slotFrom}}"
+                },
+                {
+                  "key": "to",
+                  "value": "{{slotTo}}"
+                },
+                {
+                  "key": "serviceId",
+                  "value": "{{service20Id}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Book a call (PENDING, BDT price + fee snapshot)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "[\"programId\",\"fieldId\",\"regionId\",\"countryId\",\"budgetRangeId\",\"fundingNeedId\",\"helpTopicId\",\"sourceId\",\"scholarshipId\",\"service20Id\",\"service40Id\",\"categoryId\",\"nationalityId\",\"currentStatusId\",\"graduatedStatusId\",\"bgProgramId\",\"marketBdId\",\"marketIntlId\",\"platformId\",\"payoutMethodId\",\"mentorId\"].forEach((k) => { pm.request.body.raw = pm.request.body.raw.split('\"{{' + k + '}}\"').join(pm.collectionVariables.get(k)); });"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 201', () => pm.response.to.have.status(201));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));",
+                  "const body = pm.response.json();",
+                  "pm.test('pending in BDT', () => { pm.expect(body.data.status).to.eql('PENDING'); pm.expect(body.data.currency).to.eql('BDT'); });",
+                  "pm.collectionVariables.set('bookingId', body.data.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mentorId\": \"{{mentorId}}\",\n  \"serviceId\": \"{{service20Id}}\",\n  \"scheduledAt\": \"{{slotStart}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/bookings",
+              "host": ["{{baseUrl}}"],
+              "path": ["bookings"]
+            }
+          }
+        },
+        {
+          "name": "Book the same slot again (expect 409)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "[\"programId\",\"fieldId\",\"regionId\",\"countryId\",\"budgetRangeId\",\"fundingNeedId\",\"helpTopicId\",\"sourceId\",\"scholarshipId\",\"service20Id\",\"service40Id\",\"categoryId\",\"nationalityId\",\"currentStatusId\",\"graduatedStatusId\",\"bgProgramId\",\"marketBdId\",\"marketIntlId\",\"platformId\",\"payoutMethodId\",\"mentorId\"].forEach((k) => { pm.request.body.raw = pm.request.body.raw.split('\"{{' + k + '}}\"').join(pm.collectionVariables.get(k)); });"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 409', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mentorId\": \"{{mentorId}}\",\n  \"serviceId\": \"{{service20Id}}\",\n  \"scheduledAt\": \"{{slotStart}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/bookings",
+              "host": ["{{baseUrl}}"],
+              "path": ["bookings"]
+            }
+          }
+        },
+        {
+          "name": "Book a time the mentor does not offer (expect 409)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "[\"programId\",\"fieldId\",\"regionId\",\"countryId\",\"budgetRangeId\",\"fundingNeedId\",\"helpTopicId\",\"sourceId\",\"scholarshipId\",\"service20Id\",\"service40Id\",\"categoryId\",\"nationalityId\",\"currentStatusId\",\"graduatedStatusId\",\"bgProgramId\",\"marketBdId\",\"marketIntlId\",\"platformId\",\"payoutMethodId\",\"mentorId\"].forEach((k) => { pm.request.body.raw = pm.request.body.raw.split('\"{{' + k + '}}\"').join(pm.collectionVariables.get(k)); });"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 409', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mentorId\": \"{{mentorId}}\",\n  \"serviceId\": \"{{service20Id}}\",\n  \"scheduledAt\": \"2099-01-03T03:00:00.000Z\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/bookings",
+              "host": ["{{baseUrl}}"],
+              "path": ["bookings"]
+            }
+          }
+        },
+        {
+          "name": "1:1 Sessions / My Bookings",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bookings/my",
+              "host": ["{{baseUrl}}"],
+              "path": ["bookings", "my"]
+            }
+          }
+        },
+        {
+          "name": "Continue payment (DEV stub -> CONFIRMED)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bookings/{{bookingId}}/confirm-payment-dev",
+              "host": ["{{baseUrl}}"],
+              "path": ["bookings", "{{bookingId}}", "confirm-payment-dev"]
+            }
+          }
+        },
+        {
+          "name": "Withdraw session",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bookings/{{bookingId}}/withdraw",
+              "host": ["{{baseUrl}}"],
+              "path": ["bookings", "{{bookingId}}", "withdraw"]
+            }
+          }
+        },
+        {
+          "name": "Mentor tries to book (expect 403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{mentorToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mentorId\": 1,\n  \"serviceId\": 1,\n  \"scheduledAt\": \"2099-01-01T10:00:00.000Z\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/bookings",
+              "host": ["{{baseUrl}}"],
+              "path": ["bookings"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "10. Group sessions",
+      "item": [
+        {
+          "name": "List - all",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sessions",
+              "host": ["{{baseUrl}}"],
+              "path": ["sessions"]
+            }
+          }
+        },
+        {
+          "name": "Upcoming tab",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));",
+                  "const body = pm.response.json();",
+                  "if (body.data.length) pm.collectionVariables.set('sessionId', body.data[body.data.length - 1].id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sessions?tab=upcoming",
+              "host": ["{{baseUrl}}"],
+              "path": ["sessions"],
+              "query": [
+                {
+                  "key": "tab",
+                  "value": "upcoming"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Past tab",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));",
+                  "const body = pm.response.json();",
+                  "if (body.data.length) pm.collectionVariables.set('pastSessionId', body.data[0].id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sessions?tab=past",
+              "host": ["{{baseUrl}}"],
+              "path": ["sessions"],
+              "query": [
+                {
+                  "key": "tab",
+                  "value": "past"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Category filter (by slug)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sessions?tab=upcoming&category=workshop",
+              "host": ["{{baseUrl}}"],
+              "path": ["sessions"],
+              "query": [
+                {
+                  "key": "tab",
+                  "value": "upcoming"
+                },
+                {
+                  "key": "category",
+                  "value": "workshop"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Dashboard: my group sessions",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sessions/my",
+              "host": ["{{baseUrl}}"],
+              "path": ["sessions", "my"]
+            }
+          }
+        },
+        {
+          "name": "Register (upcoming session)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 201', () => pm.response.to.have.status(201));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sessions/{{sessionId}}/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["sessions", "{{sessionId}}", "register"]
+            }
+          }
+        },
+        {
+          "name": "Register again (expect 409)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 409', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sessions/{{sessionId}}/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["sessions", "{{sessionId}}", "register"]
+            }
+          }
+        },
+        {
+          "name": "Unregister",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sessions/{{sessionId}}/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["sessions", "{{sessionId}}", "register"]
+            }
+          }
+        },
+        {
+          "name": "Register for a PAST session (expect 409, closed)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 409', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sessions/{{pastSessionId}}/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["sessions", "{{pastSessionId}}", "register"]
+            }
+          }
+        },
+        {
+          "name": "Create session (mentor)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "[\"programId\",\"fieldId\",\"regionId\",\"countryId\",\"budgetRangeId\",\"fundingNeedId\",\"helpTopicId\",\"sourceId\",\"scholarshipId\",\"service20Id\",\"service40Id\",\"categoryId\",\"nationalityId\",\"currentStatusId\",\"graduatedStatusId\",\"bgProgramId\",\"marketBdId\",\"marketIntlId\",\"platformId\",\"payoutMethodId\",\"mentorId\"].forEach((k) => { pm.request.body.raw = pm.request.body.raw.split('\"{{' + k + '}}\"').join(pm.collectionVariables.get(k)); });",
+                  "const s = new Date(Date.now() + 7 * 864e5); const e = new Date(s.getTime() + 36e5);",
+                  "pm.request.body.raw = pm.request.body.raw.replace('{{start}}', s.toISOString()).replace('{{end}}', e.toISOString());"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 201', () => pm.response.to.have.status(201));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));",
+                  "const body = pm.response.json();",
+                  "pm.collectionVariables.set('newSessionId', body.data.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{mentorToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Scholarship Q&A with mentors\",\n  \"description\": \"Live Q&A about scholarships, documents and deadlines.\",\n  \"categoryId\": \"{{categoryId}}\",\n  \"startsAt\": \"{{start}}\",\n  \"endsAt\": \"{{end}}\",\n  \"location\": \"Online\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/sessions",
+              "host": ["{{baseUrl}}"],
+              "path": ["sessions"]
+            }
+          }
+        },
+        {
+          "name": "Update session (mentor)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "[\"programId\",\"fieldId\",\"regionId\",\"countryId\",\"budgetRangeId\",\"fundingNeedId\",\"helpTopicId\",\"sourceId\",\"scholarshipId\",\"service20Id\",\"service40Id\",\"categoryId\",\"nationalityId\",\"currentStatusId\",\"graduatedStatusId\",\"bgProgramId\",\"marketBdId\",\"marketIntlId\",\"platformId\",\"payoutMethodId\",\"mentorId\"].forEach((k) => { pm.request.body.raw = pm.request.body.raw.split('\"{{' + k + '}}\"').join(pm.collectionVariables.get(k)); });"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{mentorToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Scholarship Q&A (updated)\",\n  \"description\": \"Live Q&A about scholarships, documents and deadlines.\",\n  \"categoryId\": \"{{categoryId}}\",\n  \"startsAt\": \"2099-01-01T10:00:00.000Z\",\n  \"endsAt\": \"2099-01-01T11:30:00.000Z\",\n  \"location\": \"Online\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/sessions/{{newSessionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["sessions", "{{newSessionId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete session (mentor)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{mentorToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sessions/{{newSessionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["sessions", "{{newSessionId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "11. Errors & security",
+      "item": [
+        {
+          "name": "Unknown route (expect 404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/nope",
+              "host": ["{{baseUrl}}"],
+              "path": ["nope"]
+            }
+          }
+        },
+        {
+          "name": "Protected route without token (expect 401)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bookings/my",
+              "host": ["{{baseUrl}}"],
+              "path": ["bookings", "my"]
+            }
+          }
+        },
+        {
+          "name": "Student on mentor-only route (expect 403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/mentors/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["mentors", "me"]
+            }
+          }
+        },
+        {
+          "name": "XSS payload is stripped from names",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "[\"programId\",\"fieldId\",\"regionId\",\"countryId\",\"budgetRangeId\",\"fundingNeedId\",\"helpTopicId\",\"sourceId\",\"scholarshipId\",\"service20Id\",\"service40Id\",\"categoryId\",\"nationalityId\",\"currentStatusId\",\"graduatedStatusId\",\"bgProgramId\",\"marketBdId\",\"marketIntlId\",\"platformId\",\"payoutMethodId\",\"mentorId\"].forEach((k) => { pm.request.body.raw = pm.request.body.raw.split('\"{{' + k + '}}\"').join(pm.collectionVariables.get(k)); });"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success flag', () => pm.expect(pm.response.json().success).to.eql(true));",
+                  "const body = pm.response.json();",
+                  "pm.test('script tag removed', () => pm.expect(body.data.firstName).to.not.include('<script'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"<script>alert(1)</script>Eve\",\n  \"lastName\": \"Student\",\n  \"onboarding\": {\n    \"programId\": \"{{programId}}\",\n    \"fieldIds\": [\n      \"{{fieldId}}\"\n    ],\n    \"regionIds\": [\n      \"{{regionId}}\"\n    ],\n    \"countryIds\": [\n      \"{{countryId}}\"\n    ],\n    \"countriesOther\": false,\n    \"budgetRangeId\": \"{{budgetRangeId}}\",\n    \"fundingNeedId\": \"{{fundingNeedId}}\",\n    \"workWhileStudying\": true,\n    \"stayAfterStudy\": \"YES\",\n    \"ielts\": {\n      \"taken\": true,\n      \"score\": 7.5\n    },\n    \"applyMode\": \"ASSISTED\",\n    \"helpTopicIds\": [\n      \"{{helpTopicId}}\"\n    ],\n    \"timezone\": \"Asia/Dhaka\",\n    \"sourceId\": \"{{sourceId}}\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/students/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["students", "me"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
