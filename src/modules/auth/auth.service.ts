@@ -15,11 +15,9 @@ import type { GoogleInput, RegisterMentorInput, RegisterStudentInput } from './a
 const BCRYPT_ROUNDS = 12;
 const VERIFY_TTL_MS = 24 * 60 * 60 * 1000;
 const RESET_TTL_MS = 60 * 60 * 1000;
-// Compared against when the email is unknown, so response time does not reveal which emails exist.
 const DUMMY_HASH = bcrypt.hashSync('timing-attack-guard', BCRYPT_ROUNDS);
 const googleClient = env.GOOGLE_CLIENT_ID ? new OAuth2Client(env.GOOGLE_CLIENT_ID) : null;
 
-// ------------------------------------------------------------- helpers ----
 const toPublicUser = ({ id, firstName, lastName, email, role, timezone, referralCode }: User) => ({
   id, firstName, lastName, email, role, timezone, referralCode,
 });
@@ -29,7 +27,6 @@ const issueJwt = ({ id, role }: User) =>
 
 const withToken = (user: User) => ({ user: toPublicUser(user), token: issueJwt(user) });
 
-// Referral codes look like "PRAN-PAAZ": first letters of the name + 4 random characters.
 const CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 const randomSuffix = () =>
   Array.from(crypto.randomBytes(4), (byte) => CODE_ALPHABET[byte % CODE_ALPHABET.length]).join('');
@@ -43,21 +40,18 @@ const newReferralCode = async (firstName: string) => {
   throw new AppError('Could not generate a referral code, please retry', 503);
 };
 
-// An unknown referral code is ignored: a typo must not block sign-up.
 const findReferrerId = async (referralCode?: string) =>
   referralCode ? (await prisma.user.findUnique({ where: { referralCode }, select: { id: true } }))?.id : undefined;
 
-// ------------------------------------------------- one-time email tokens ----
 const issueAuthToken = async (userId: number, type: TokenType, ttlMs: number) => {
   const token = generateToken();
   await prisma.$transaction([
-    prisma.authToken.deleteMany({ where: { userId, type, usedAt: null } }), // older links stop working
+    prisma.authToken.deleteMany({ where: { userId, type, usedAt: null } }),
     prisma.authToken.create({ data: { userId, type, tokenHash: hashToken(token), expiresAt: new Date(Date.now() + ttlMs) } }),
   ]);
   return token;
 };
 
-/** Atomically marks the token used (so a link works once) and returns its owner. */
 const consumeAuthToken = async (token: string, type: TokenType) => {
   const tokenHash = hashToken(token);
   const { count } = await prisma.authToken.updateMany({
@@ -68,19 +62,18 @@ const consumeAuthToken = async (token: string, type: TokenType) => {
   return prisma.authToken.findUniqueOrThrow({ where: { tokenHash }, select: { userId: true } });
 };
 
-// A mail outage must not fail the request: the user can always ask for a new link.
-const deliver = (mail: Parameters<typeof sendMail>[0]) =>
-  sendMail(mail).catch((error) => console.error('Failed to send email:', error));
+const deliver = (mail: Parameters<typeof sendMail>[0]) => {
+  void sendMail(mail).catch((error) => console.error('Failed to send email:', error));
+};
 
 const sendVerificationEmail = async ({ id, email }: Pick<User, 'id' | 'email'>) => {
   const token = await issueAuthToken(id, 'VERIFY_EMAIL', VERIFY_TTL_MS);
-  await deliver(
+  deliver(
     callToActionMail(email, 'Verify your AbroadMates account', 'Welcome to AbroadMates. Verify your email to activate your account.',
       'Verify Email', `${env.APP_URL}/verify-email?token=${token}`),
   );
 };
 
-// -------------------------------------------------------- registration ----
 export const registerStudent = async (input: RegisterStudentInput) => {
   const { firstName, lastName, email, password, referralCode, onboarding } = input;
   const [passwordHash, referredById, ownCode] = await Promise.all([
@@ -89,7 +82,6 @@ export const registerStudent = async (input: RegisterStudentInput) => {
     newReferralCode(firstName),
   ]);
 
-  // Duplicate email -> Prisma P2002 -> 409 via the global error handler.
   const user = await prisma.user.create({
     data: {
       firstName, lastName, email, passwordHash, role: 'STUDENT', timezone: onboarding.timezone,
@@ -101,12 +93,6 @@ export const registerStudent = async (input: RegisterStudentInput) => {
   return { email: user.email, verificationRequired: true };
 };
 
-/**
- * Mentor sign-up: creates a MENTOR account and sends a verification email, but returns a
- * login token immediately so the wizard can begin before the email is verified (publishing
- * at step 11 still requires a verified email). The draft profile is built through the
- * wizard /mentors/me/... endpoints.
- */
 export const registerMentor = async (input: RegisterMentorInput) => {
   const { fullName, email, password } = input;
   const [passwordHash, ownCode] = await Promise.all([
@@ -114,12 +100,10 @@ export const registerMentor = async (input: RegisterMentorInput) => {
     newReferralCode(fullName),
   ]);
 
-  // Store the single "full name" the way the schema expects it (first + last).
   const parts = fullName.trim().split(/\s+/);
   const firstName = parts[0] || fullName;
   const lastName = parts.slice(1).join(' ') || '-';
 
-  // Duplicate email -> Prisma P2002 -> 409 via the global error handler.
   const user = await prisma.user.create({
     data: { firstName, lastName, email, passwordHash, role: 'MENTOR', referralCode: ownCode },
   });
@@ -139,13 +123,11 @@ export const verifyEmail = async (token: string) => {
   return { verified: true };
 };
 
-/** Always succeeds from the caller's view, so it cannot be used to discover registered emails. */
 export const resendVerification = async (email: string) => {
   const user = await prisma.user.findUnique({ where: { email } });
   if (user && !user.emailVerifiedAt) await sendVerificationEmail(user);
 };
 
-// --------------------------------------------------------------- login ----
 export const login = async ({ email, password }: { email: string; password: string }) => {
   const user = await prisma.user.findUnique({ where: { email } });
   const passwordMatches = await bcrypt.compare(password, user?.passwordHash ?? DUMMY_HASH);
@@ -158,12 +140,11 @@ export const login = async ({ email, password }: { email: string; password: stri
 
 export const getMe = async (id: number) => toPublicUser(await prisma.user.findUniqueOrThrow({ where: { id } }));
 
-// ------------------------------------------------------ password reset ----
 export const forgotPassword = async (email: string) => {
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user) return;
   const token = await issueAuthToken(user.id, 'RESET_PASSWORD', RESET_TTL_MS);
-  await deliver(
+  deliver(
     callToActionMail(email, 'Reset your AbroadMates password', 'We received a request to reset your password. This link works for one hour.',
       'Reset Password', `${env.APP_URL}/reset-password?token=${token}`),
   );
@@ -172,7 +153,6 @@ export const forgotPassword = async (email: string) => {
 export const resetPassword = async ({ token, password }: { token: string; password: string }) => {
   const { userId } = await consumeAuthToken(token, 'RESET_PASSWORD');
   const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
-  // Following the emailed link also proves ownership of the address.
   const user = await prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { emailVerifiedAt: true } });
   await prisma.user.update({
     where: { id: userId },
@@ -180,7 +160,6 @@ export const resetPassword = async ({ token, password }: { token: string; passwo
   });
 };
 
-// -------------------------------------------------------------- google ----
 export const loginWithGoogle = async ({ idToken, referralCode, onboarding }: GoogleInput) => {
   if (!googleClient) throw new AppError('Google sign-in is not configured', 501);
 

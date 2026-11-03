@@ -55,11 +55,14 @@ const consumeAuthToken = async (token, type) => {
         throw AppError.badRequest('This link is invalid or has expired');
     return prisma.authToken.findUniqueOrThrow({ where: { tokenHash }, select: { userId: true } });
 };
-// A mail outage must not fail the request: the user can always ask for a new link.
-const deliver = (mail) => sendMail(mail).catch((error) => console.error('Failed to send email:', error));
+// A mail outage must not fail or delay the request: the user can always ask for a new link.
+// Fire-and-forget — the HTTP response does not wait for SMTP.
+const deliver = (mail) => {
+    void sendMail(mail).catch((error) => console.error('Failed to send email:', error));
+};
 const sendVerificationEmail = async ({ id, email }) => {
     const token = await issueAuthToken(id, 'VERIFY_EMAIL', VERIFY_TTL_MS);
-    await deliver(callToActionMail(email, 'Verify your AbroadMates account', 'Welcome to AbroadMates. Verify your email to activate your account.', 'Verify Email', `${env.APP_URL}/verify-email?token=${token}`));
+    deliver(callToActionMail(email, 'Verify your AbroadMates account', 'Welcome to AbroadMates. Verify your email to activate your account.', 'Verify Email', `${env.APP_URL}/verify-email?token=${token}`));
 };
 // -------------------------------------------------------- registration ----
 export const registerStudent = async (input) => {
@@ -138,7 +141,7 @@ export const forgotPassword = async (email) => {
     if (!user)
         return;
     const token = await issueAuthToken(user.id, 'RESET_PASSWORD', RESET_TTL_MS);
-    await deliver(callToActionMail(email, 'Reset your AbroadMates password', 'We received a request to reset your password. This link works for one hour.', 'Reset Password', `${env.APP_URL}/reset-password?token=${token}`));
+    deliver(callToActionMail(email, 'Reset your AbroadMates password', 'We received a request to reset your password. This link works for one hour.', 'Reset Password', `${env.APP_URL}/reset-password?token=${token}`));
 };
 export const resetPassword = async ({ token, password }) => {
     const { userId } = await consumeAuthToken(token, 'RESET_PASSWORD');

@@ -16,10 +16,12 @@ const transport = env.SMTP_HOST
       auth: env.SMTP_USER
         ? { user: env.SMTP_USER, pass: env.SMTP_PASS?.replace(/\s/g, '') }
         : undefined,
+      connectionTimeout: 10_000,
+      greetingTimeout: 10_000,
+      socketTimeout: 20_000,
     })
   : null;
 
-/** Sends an email. Without SMTP_HOST (development) the message is printed to the console. */
 export const sendMail = async (mail: Mail): Promise<void> => {
   if (!transport) {
     console.log(`\n[mail:dev] to=${mail.to}\nsubject: ${mail.subject}\n${mail.text}\n`);
@@ -31,7 +33,6 @@ export const sendMail = async (mail: Mail): Promise<void> => {
 const escapeHtml = (value: string) =>
   value.replace(/[&<>"']/g, (char) => `&#${char.charCodeAt(0)};`);
 
-/** One call-to-action email in the AbroadMates style. */
 export const callToActionMail = (to: string, subject: string, intro: string, label: string, url: string): Mail => ({
   to,
   subject,

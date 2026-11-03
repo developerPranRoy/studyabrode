@@ -27,10 +27,31 @@ app.use(sanitizeInput); // strips HTML from all user text
 // --- Static files: only profile photos are public; CVs go through an authenticated route
 app.use('/uploads/photos', express.static(path.join(UPLOAD_ROOT, 'photos'), { index: false, maxAge: '7d' }));
 // --- Routes -----------------------------------------------------------------
+// Friendly landing response: every API route lives under /api/v1.
+app.get('/', (_req, res) => {
+    res.json({
+        success: true,
+        service: 'AbroadMates API',
+        health: '/health',
+        api: '/api/v1',
+    });
+});
 app.get('/health', catchAsync(async (_req, res) => {
     await prisma.$queryRaw `SELECT 1`;
     res.json({ success: true, status: 'ok', uptime: process.uptime() });
 }));
+app.get('/api/v1', (_req, res) => {
+    res.json({
+        success: true,
+        service: 'AbroadMates API',
+        version: 'v1',
+        examples: {
+            health: '/health',
+            mentors: '/api/v1/mentors',
+            onboardingOptions: '/api/v1/lookups/onboarding-options',
+        },
+    });
+});
 app.use('/api/v1', apiLimiter, routes);
 // --- Errors (must be last) --------------------------------------------------
 app.use(notFound);

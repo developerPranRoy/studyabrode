@@ -8,6 +8,10 @@ const transport = env.SMTP_HOST
         auth: env.SMTP_USER
             ? { user: env.SMTP_USER, pass: env.SMTP_PASS?.replace(/\s/g, '') }
             : undefined,
+        // Never let a slow mail server hold an HTTP request open.
+        connectionTimeout: 10_000,
+        greetingTimeout: 10_000,
+        socketTimeout: 20_000,
     })
     : null;
 /** Sends an email. Without SMTP_HOST (development) the message is printed to the console. */

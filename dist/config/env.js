@@ -13,7 +13,9 @@ const schema = z.object({
     JWT_SECRET: z.string().min(32, 'JWT_SECRET must be at least 32 characters'),
     JWT_EXPIRES_IN: z.string().default('1d'),
     CORS_ORIGINS: z.string().default('http://localhost:3000'),
-    APP_URL: z.string().url().default('http://localhost:3000'),
+    // Public client URL used in verification / reset e-mail links. Falls back to
+    // the first CORS origin, so a deployed client does not get localhost links.
+    APP_URL: z.string().trim().url().optional().or(z.literal('')),
     UPLOAD_DIR: z.string().default('uploads'),
     UNIVERSITY_API_URL: z.string().url().default('http://universities.hipolabs.com/search'),
     SMTP_HOST: optionalString,
@@ -36,9 +38,14 @@ if (isProd && (!parsed.data.SMTP_HOST || !parsed.data.TURNSTILE_SECRET_KEY)) {
     console.error('SMTP_HOST and TURNSTILE_SECRET_KEY are required in production');
     process.exit(1);
 }
+const corsOrigins = parsed.data.CORS_ORIGINS.split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+const appUrl = parsed.data.APP_URL || corsOrigins[0] || 'http://localhost:3000';
 export const env = {
     ...parsed.data,
+    APP_URL: appUrl,
     isProd,
-    corsOrigins: parsed.data.CORS_ORIGINS.split(',').map((origin) => origin.trim()),
+    corsOrigins,
 };
 //# sourceMappingURL=env.js.map
